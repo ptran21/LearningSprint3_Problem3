@@ -379,6 +379,7 @@
       }
 
       function startGame() {
+        // Initialize a fresh game ONLY when coming from menu or gameover
         if (!audioContext) initAudio();
         configureLevel(1);
         game.score = 0;
@@ -876,11 +877,27 @@
 
       startButton.addEventListener('click', () => {
         resumeAudioIfNeeded();
-        startGame();
+
+        // NEW BEHAVIOR:
+        // If currently in countdown → skip it and start immediately
+        if (game.state === 'countdown') {
+          game.state = 'running';
+          hideOverlay();
+          return;
+        }
+
+        // If in menu → start normally (with countdown)
+        if (game.state === 'menu') {
+          startGame();
+          return;
+        }
+
+        // If already running → do nothing (prevent reset bug)
       });
 
       restartButton.addEventListener('click', () => {
         resumeAudioIfNeeded();
+        // Restart should fully reset the game
         restartGame();
       });
 
